@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Australia's Coffee Landscape</title>
+    <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #FDFBF7; /* Cream/Off-white */
+            --text-color: #3E2723; /* Dark espresso brown */
+            --accent-color: #D84315; /* Burnt orange */
+            --container-bg: #FFFFFF;
+            --border-radius: 12px;
+        }
+
+        body { 
+            font-family: 'Open Sans', sans-serif; 
+            background-color: var(--bg-color); 
+            color: var(--text-color);
+            max-width: 950px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            line-height: 1.7;
+        }
+
+        h1 { 
+            font-family: 'Merriweather', serif;
+            text-align: center; 
+            font-size: 2.8em;
+            color: var(--text-color);
+            border-bottom: 3px solid var(--accent-color);
+            padding-bottom: 15px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 1.2em;
+            color: #5D4037;
+            margin-bottom: 50px;
+            font-style: italic;
+        }
+
+        h2 { 
+            font-family: 'Merriweather', serif;
+            color: var(--accent-color); 
+            margin-top: 0;
+            font-size: 1.8em;
+        }
+
+        p {
+            font-size: 1.1em;
+            margin-bottom: 25px;
+            color: #4E342E;
+        }
+
+        .story-section {
+            background: var(--container-bg);
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 8px 24px rgba(62, 39, 35, 0.08);
+            margin-bottom: 50px;
+        }
+
+        .vis-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #EFEBE9;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Australia's Coffee Landscape</h1>
+    <div class="subtitle">An exploration of specialty roasting and macro-production Down Under.</div>
+
+    <div class="story-section">
+        <h2>1. Sourcing the Best Beans</h2>
+        <p>Australian roasters traverse the globe to find the perfect flavour profiles. But which origins yield the highest average ratings for our local roasters? This chart highlights the global origins of beans brought into Australia, sorted by their average cup score.</p>
+        <div class="vis-wrapper">
+            <div id="vis2"></div>
+        </div>
+    </div>
+
+    <div class="story-section">
+        <h2>2. How Much Are We Paying?</h2>
+        <p>Specialty coffee is a premium product, but what is the typical price range per 100g in the Australian market? The distribution below reveals that most coffees sit comfortably in an accessible middle ground, with a long "tail" of highly expensive, rare nano-lots.</p>
+        <div class="vis-wrapper">
+            <div id="vis3"></div>
+        </div>
+    </div>
+
+    <div class="story-section">
+        <h2>3. Macro Trends: Australia's Production vs. Exports</h2>
+        <p>Zooming out from the café scene to macroeconomic agriculture, how does Australia's domestic coffee production compare to its exports? While not a global giant in coffee farming, Australia cultivates specific bean types. This scatter plot explores the relationship between production volumes and export success.</p>
+        <div class="vis-wrapper">
+            <div id="vis4"></div>
+        </div>
+    </div>
+
+    <div class="story-section">
+        <h2>4. The Evolution of Australian Harvests</h2>
+        <p>Finally, we track the total volume of coffee produced by Australia over the past few decades. Fluctuations in this timeline represent the realities of agricultural farming—impacted by climate events, local market demand, and shifting industry focus.</p>
+        <div class="vis-wrapper">
+            <div id="vis5"></div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        
+        // Vis 2: Bar Chart (Filtered to Australia)
+        var spec2 = {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "width": 750, "height": 350,
+            "data": {"url": "simplified_coffee.csv"},
+            "transform": [
+                {"filter": "datum.loc_country == 'Australia'"}
+            ],
+            "mark": {"type": "bar", "color": "#8D6E63", "cornerRadiusEnd": 4},
+            "encoding": {
+                "x": {"field": "origin", "type": "nominal", "sort": "-y", "title": "Origin Country", "axis": {"labelAngle": -45}},
+                "y": {"field": "rating", "type": "quantitative", "aggregate": "average", "scale": {"domain": [90, 96]}, "title": "Average Rating"},
+                "tooltip": [
+                    {"field": "origin", "type": "nominal", "title": "Origin"},
+                    {"field": "rating", "aggregate": "average", "type": "quantitative", "title": "Avg Rating", "format": ".1f"}
+                ]
+            }
+        };
+
+        // Vis 3: Histogram (Filtered to Australia)
+        var spec3 = {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "width": 750, "height": 350,
+            "data": {"url": "simplified_coffee.csv"},
+            "transform": [{"filter": "datum.loc_country == 'Australia'"}],
+            "mark": {"type": "bar", "color": "#D84315", "stroke": "white", "strokeWidth": 1},
+            "encoding": {
+                "x": {"field": "100g_USD", "bin": {"maxbins": 25}, "title": "Price per 100g (USD)", "axis": {"grid": false}},
+                "y": {"aggregate": "count", "title": "Number of Coffees Roasted in Aus"},
+                "tooltip": [
+                    {"field": "100g_USD", "bin": true, "title": "Price Range (USD)"},
+                    {"aggregate": "count", "title": "Count"}
+                ]
+            }
+        };
+
+        // Vis 4: Macro Scatter (Filtered to Country = Australia)
+        var spec4 = {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "width": 750, "height": 400,
+            "data": {"url": "coffeedata.csv"},
+            "transform": [{"filter": "datum.Country == 'Australia'"}],
+            "mark": {"type": "point", "filled": true, "size": 90, "opacity": 0.8},
+            "encoding": {
+                "x": {"field": "Production", "type": "quantitative", "title": "Total Production Volume"},
+                "y": {"field": "Exports", "type": "quantitative", "title": "Total Export Volume"},
+                "color": {
+                    "field": "Coffee_type", 
+                    "type": "nominal", 
+                    "title": "Coffee Bean Type",
+                    "scale": {
+                        "range": ["#2C1A09", "#D98A44", "#99582A", "#4E6766"] 
+                    }
+                },
+                "tooltip": [
+                    {"field": "Year", "type": "nominal"},
+                    {"field": "Coffee_type", "type": "nominal", "title": "Type"},
+                    {"field": "Production", "type": "quantitative"},
+                    {"field": "Exports", "type": "quantitative"}
+                ]
+            }
+        };
+
+        // Vis 5: Macro Line Chart (Filtered to Country = Australia)
+        var spec5 = {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "width": 750, "height": 350,
+            "data": {"url": "coffeedata.csv"},
+            "transform": [{"filter": "datum.Country == 'Australia'"}],
+            "mark": {"type": "line", "color": "#D84315", "strokeWidth": 3, "point": {"color": "#5D4037", "filled": true, "size": 50}},
+            "encoding": {
+                "x": {"field": "Year", "type": "temporal", "title": "Year", "axis": {"grid": false}},
+                "y": {"field": "Production", "type": "quantitative", "aggregate": "sum", "title": "Total Australian Production"},
+                "tooltip": [
+                    {"field": "Year", "type": "temporal", "timeUnit": "year", "title": "Year"},
+                    {"field": "Production", "aggregate": "sum", "type": "quantitative", "title": "Total Production"}
+                ]
+            }
+        };
+
+        // Embed the charts
+        vegaEmbed('#vis2', spec2, {actions: false}).catch(console.error);
+        vegaEmbed('#vis3', spec3, {actions: false}).catch(console.error);
+        vegaEmbed('#vis4', spec4, {actions: false}).catch(console.error);
+        vegaEmbed('#vis5', spec5, {actions: false}).catch(console.error);
+    </script>
+</body>
+</html>
